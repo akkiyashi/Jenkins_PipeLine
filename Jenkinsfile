@@ -1,55 +1,28 @@
-String credentialsId = 'awsCredentials'
 try{
-	stage('checkout') {
-    node {
-      cleanWs()
-      checkout scm
-    }
-  }
-	stage("init"){
-			node{
-					withCredentials([[
-					$class: 'AmazonWebServicesCredentialsBinding',
-					credentialsId: credentialsId,
-					accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-					secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
-					ansiColor('xterm') {
+	pipeline{
+		agent any
+		stages{
+			stage("Init"){
+				steps{
 					sh 'terraform init'
 				}
 			}
-		}
-	}
-	stage("Plan"){
-		node{
-			withCredentials([[
-					$class: 'AmazonWebServicesCredentialsBinding',
-					credentialsId: credentialsId,
-					accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-					secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
-					ansiColor('xterm') {
+			stage("Plan"){
+				steps{
 					sh 'terraform plan'
 				}
-		}
-		}
-		
-	}
-	stage("Approval"){
-		node{
-			slackSend color: '#BADA55', message: 'Please Verfiy the Plan details and take action'
-			input 'Approve or Reject?'
-		}
-	}
-	stage("Apply"){
-		node{
-			withCredentials([[
-					$class: 'AmazonWebServicesCredentialsBinding',
-					credentialsId: credentialsId,
-					accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-					secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
-							ansiColor('xterm'){
-								sh 'terraform apply'
-							}
-						}
+			}
+			stage("Approval"){
+				steps{
+					slackSend color: '#BADA55', message: 'Please Verfiy the Plan details and take action'
+					input 'Approve or Reject?'
+				}
+			}
+			stage("Apply"){
+				steps{
+					sh 'terraform apply --auto-approve'
+				}
+			}
 		}
 	}
 }
