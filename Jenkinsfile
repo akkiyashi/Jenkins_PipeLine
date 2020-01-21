@@ -1,10 +1,13 @@
 String credentialsId = 'awsCredentials'
 try{
-pipeline{
-agent any
-	stages{
-		stage("init"){
-			steps{
+	stage('checkout') {
+    node {
+      cleanWs()
+      checkout scm
+    }
+  }
+	stage("init"){
+			node{
 					withCredentials([[
 					$class: 'AmazonWebServicesCredentialsBinding',
 					credentialsId: credentialsId,
@@ -15,14 +18,14 @@ agent any
 				}
 			}
 		}
-		stage("Plan"){
-		}
-		stage("Approval"){
-		}
-		stage("Apply"){
-		}
 	}
-}
+	stage("Plan"){
+	}
+	stage("Approval"){
+	}
+	stage("Apply"){
+	}
+	}
 }
 }
 catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException flowError) {
