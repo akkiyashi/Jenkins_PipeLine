@@ -30,6 +30,7 @@ try{
 					sh 'terraform plan'
 				}
 		}
+		}
 		
 	}
 	stage("Approval"){
